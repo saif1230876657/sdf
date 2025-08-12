@@ -732,7 +732,7 @@
       text-decoration: underline;
     }
     
-    .camera-modal, .share-modal, .voice-conversation-modal { 
+    .modal-backdrop { 
         display: none; 
         position: fixed;
         z-index: 1000;
@@ -747,15 +747,15 @@
         backdrop-filter: blur(5px);
         animation: fadeIn 0.3s ease;
     }
-    .share-modal { z-index: 1001; }
-    .voice-conversation-modal { z-index: 1002; }
+    #shareModal { z-index: 1001; }
+    #voiceConversationModal { z-index: 1002; }
 
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
     }
 
-    .camera-modal-content, .share-modal-content, .voice-conversation-content { 
+    .modal-content { 
         background-color: var(--bg-surface);
         padding: 25px;
         border: 1px solid var(--border-color);
@@ -939,10 +939,8 @@
     /* Voice Conversation Modal Styles */
     .voice-conversation-content {
         background: var(--bg-main);
-        width: 95%;
-        height: 95%;
-        max-width: 600px;
-        max-height: 800px;
+        width: 100%;
+        height: 100%;
     }
     #voiceInterface {
         display: flex;
@@ -951,60 +949,86 @@
         align-items: center;
         height: 100%;
         width: 100%;
+        padding: 20px;
+    }
+    #voiceTranscriptContainer {
+        width: 100%;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-y: auto;
+        border-bottom: 1px solid var(--border-color);
+    }
+    #voiceTranscript {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        padding: 10px;
+        text-align: center;
     }
     #voiceStatus {
         font-size: 1.2rem;
         color: var(--text-secondary);
         min-height: 50px;
         padding: 10px;
+        text-align: center;
     }
-    #voiceTranscript {
-        font-size: 1rem;
-        color: var(--text-primary);
-        padding: 10px;
-        max-height: 100px;
-        overflow-y: auto;
-    }
-
-    .voice-sphere-container {
+    .visualizer-container {
         flex-grow: 1;
         display: flex;
         justify-content: center;
         align-items: center;
         position: relative;
-    }
-    #voiceSphere {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: var(--primary-color);
+        width: 100%;
+        min-height: 200px;
         cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 0 10px var(--primary-glow-color);
     }
-    #voiceSphere:hover {
-        transform: scale(1.05);
+    .visualizer {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        transform-style: preserve-3d;
+        transform: rotateX(-15deg) rotateY(0deg);
+        transition: transform 0.5s ease;
     }
-    #voiceSphere.listening {
-        animation: pulseRecording 1.5s infinite;
+    .visualizer:hover {
+        transform: rotateX(-10deg) rotateY(0deg) scale(1.05);
     }
-     #voiceSphere.speaking::before {
-        content: '';
+    .visualizer-wave {
         position: absolute;
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        border: 4px solid var(--success-color);
-        animation: wave 1.5s infinite;
-        box-sizing: border-box;
+        border: 2px solid var(--primary-color);
+        opacity: 0.8;
+        animation: wave-idle 4s ease-in-out infinite;
+    }
+    .visualizer-wave:nth-child(2) { animation-delay: -1s; }
+    .visualizer-wave:nth-child(3) { animation-delay: -2s; }
+    .visualizer-wave:nth-child(4) { animation-delay: -3s; }
+
+    .visualizer.listening .visualizer-wave {
+        animation-name: wave-listening;
+        animation-duration: 2s;
+        border-color: var(--secondary-color);
+    }
+    .visualizer.speaking .visualizer-wave {
+        animation-name: wave-speaking;
+        animation-duration: 1.2s;
+        border-color: var(--success-color);
     }
 
-    @keyframes wave {
-        0% { transform: scale(1); opacity: 1; }
-        100% { transform: scale(1.8); opacity: 0; }
+    @keyframes wave-idle {
+        0%, 100% { transform: scale(0.8); opacity: 0.8; }
+        50% { transform: scale(1); opacity: 0.2; }
+    }
+    @keyframes wave-listening {
+        0%, 100% { transform: scale(0.5) rotateZ(0deg); opacity: 0.1; }
+        50% { transform: scale(1.2) rotateZ(180deg); opacity: 1; }
+    }
+    @keyframes wave-speaking {
+        0%, 100% { transform: scale(0.9); opacity: 0.9; }
+        50% { transform: scale(1.1); opacity: 0.5; }
     }
 
     @media (max-width: 768px) { 
@@ -1013,37 +1037,9 @@
         border-left: none;
         border-right: none;
       }
-      :root { 
-        --header-padding-vertical: 0.4rem;
-        --header-padding-horizontal: 0.7rem;
-        --header-gap: 0.4rem;
-        --header-icon-size: 1.2rem;
-        --header-icon-container-size: 30px;
-        --header-title-font-size: 1rem;
-        --header-btn-font-size: 0.7rem;
-        --header-btn-padding-vertical: 0.3rem;
-        --header-btn-padding-horizontal: 0.6rem;
-
-        --chat-input-area-height: 55px; 
-        --status-bar-area-height: 22px;
-        --search-log-area-height: 18px;
-        --scroll-btn-size: 38px;
-        --scroll-btn-spacing: 8px;
-      }
-      #subjectsViewContainer { padding: 1rem; }
-      .subjects-view-header h2 { font-size: 1.4rem; }
-      .back-to-chat-btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
-      .subject-item-btn { padding: 15px 18px; font-size: 0.95rem; min-width: 150px; gap: 8px;}
-      .subject-item-btn i { font-size: 2rem; }
-
-
-      .bubble { max-width: 85%; padding: 0.8rem 1rem; line-height: 1.6; }
-      .chat-input { padding: 0.6rem 0.8rem; gap: 0.6rem; } 
-      .chat-input textarea { font-size: 0.9rem; padding: 0.7rem 1rem; } 
-      .chat-input-btn { width: 40px; height: 40px; font-size: 1rem; } 
-      .upload-options-container { right: 48px; } 
-      .upload-options-container button { padding: 8px 12px; font-size: 0.85rem; }
-      #voiceSphere { width: 100px; height: 100px; }
+      .visualizer { width: 120px; height: 120px; }
+      #voiceStatus { font-size: 1rem; }
+      #voiceTranscript { font-size: 1rem; }
     }
 
     @media (max-width: 480px) { 
@@ -1052,97 +1048,16 @@
         border-left: none;
         border-right: none;
       }
-      :root {
-        --header-padding-vertical: 0.3rem;
-        --header-padding-horizontal: 0.5rem;
-        --header-gap: 0.3rem;
-        --header-icon-size: 1.1rem;
-        --header-icon-container-size: 28px;
-        --header-title-font-size: 0.9rem;
-        --header-btn-font-size: 0.65rem;
-        --header-btn-padding-vertical: 0.25rem;
-        --header-btn-padding-horizontal: 0.5rem;
-        
-        --chat-input-area-height: 52px; 
-        --status-bar-area-height: 20px;
-        --search-log-area-height: 16px;
-        --scroll-btn-size: 36px;
-        --scroll-btn-spacing: 6px;
-      }
-      .download-notification {
-          font-size: 0.8rem;
-          padding: 0 10px;
-      }
-      .download-notification.show {
-          padding: 8px 10px;
-      }
-      .download-btn {
-          padding: 4px 10px;
-          font-size: 0.75rem;
-      }
-      .notification-buttons {
-          gap: 5px;
-          padding-right: 10px;
-      }
-      .header { 
-        flex-wrap: wrap; 
-        justify-content: center; 
-      }
-       .header .share-btn-header { order: 0; margin: 2px; }
-       .header .delete-all-btn { order: 1; margin: 2px; }
-       .header .fas.fa-robot { order: 2; margin: 2px; }
-       .header h1 { order: 3; width: 100%; text-align: center; margin: 3px 0; }
-       #subjectControls { order: 4; width: 100%; justify-content: center; margin-top: 0.2rem; }
+      .header { flex-wrap: wrap; justify-content: center; }
+      .header .share-btn-header { order: 0; }
+      .header .delete-all-btn { order: 1; }
+      .header .fas.fa-robot { order: 2; }
+      .header h1 { order: 3; width: 100%; text-align: center; margin: 3px 0; }
+      #subjectControls { order: 4; width: 100%; justify-content: center; }
       
-      .share-modal-content { padding: 25px; width: 90%; }
-      .share-modal-content h2 { font-size: 1.5rem; }
-      .share-modal-content p { font-size: 0.9rem; margin-bottom: 20px;}
-      .share-link-container { flex-direction: column; gap: 8px; }
-      .share-link-container input { border-radius: var(--border-radius-md); border-right: 1px solid var(--border-color-light);}
-      .share-link-container button { border-radius: var(--border-radius-md); justify-content: center; }
-
-      #subjectsViewContainer { padding: 0.8rem; }
-      .subjects-view-header { flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
-      .subjects-view-header h2 { font-size: 1.3rem; text-align: center; }
-      .back-to-chat-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; margin-top: 0.5rem; }
-      #subjectListContainer { gap: 12px; padding: 5px; }
-      .subject-item-btn { padding: 12px 15px; font-size: 0.9rem; min-width: calc(50% - 6px); gap: 6px; } 
-      .subject-item-btn i { font-size: 1.8rem; }
-
-
-      .chat-container { padding: 1rem 0.6rem; }
-      .message-header { font-size: 0.7rem; gap: 5px; }
-      .bubble { max-width: 90%; padding: 0.7rem 0.9rem; line-height: 1.55; }
-      .message-actions button { font-size: 0.85rem; padding: 4px 8px; }
-      
-      .chat-input { padding: 0.5rem 0.6rem; gap: 0.5rem; }
-      .chat-input textarea { font-size: 0.85rem; padding: 0.6rem 0.9rem; max-height: 100px; }
-      .chat-input-btn { width: 38px; height: 38px; font-size: 0.95rem; }
-      .upload-options-container { right: 44px; } 
-      .upload-options-container button { padding: 7px 10px; font-size: 0.8rem; }
-      .upload-options-container button i { font-size: 1rem; }
-      .status { font-size: 0.75rem; padding: 0.3rem;}
-      .search-log { font-size: 0.7rem; padding: 0.15rem 0;}
-      .scroll-btn { right: 18px; }
-      .toggle-details-btn { font-size: 0.85rem; }
+      .visualizer { width: 100px; height: 100px; }
     }
 
-    @media (max-width: 360px) { 
-       :root {
-        --chat-input-area-height: 50px;
-        --status-bar-area-height: 20px; 
-        --search-log-area-height: 15px;
-        --scroll-btn-size: 34px;
-        --header-title-font-size: 0.85rem;
-       }
-      .subject-item-btn { min-width: calc(50% - 6px); font-size: 0.85rem;} 
-      .subject-item-btn i { font-size: 1.6rem; }
-
-      .bubble { padding: 0.6rem 0.8rem; }
-      .chat-input textarea { padding: 0.5rem 0.8rem; }
-      .chat-input-btn { width: 36px; height: 36px; }
-      .upload-options-container { right: 42px; } 
-    }
   </style>
 </head>
 <body>
@@ -1218,7 +1133,8 @@
         </div>
     </div>
 
-    <div id="subjectsViewContainer"> 
+    <div id="subjectsViewContainer" class="modal-backdrop"> 
+      <div class="modal-content">
         <div class="subjects-view-header">
             <h2>اختر المادة الدراسية</h2>
             <button id="backToChatBtn" class="back-to-chat-btn">
@@ -1228,12 +1144,13 @@
         <div id="subjectListContainer">
             <!-- Subject items will be populated here by JS -->
         </div>
+      </div>
     </div>
   </div>
 
   <!-- Camera Modal -->
-  <div id="cameraModal" class="camera-modal">
-    <div class="camera-modal-content">
+  <div id="cameraModal" class="modal-backdrop">
+    <div class="modal-content" id="camera-modal-content">
       <video id="cameraView" autoplay playsinline></video>
       <div class="camera-controls">
         <button id="captureBtn">التقاط صورة</button>
@@ -1243,8 +1160,8 @@
   </div>
 
   <!-- Share Modal -->
-  <div id="shareModal" class="share-modal">
-    <div class="share-modal-content">
+  <div id="shareModal" class="modal-backdrop">
+    <div class="modal-content share-modal-content">
       <span class="close-modal-btn" id="closeShareModal">×</span>
       <h2>مشاركة التطبيق</h2>
       <p>شارك الرابط مع أصدقائك لدعمنا!</p>
@@ -1257,13 +1174,20 @@
   </div>
 
   <!-- Voice Conversation Modal -->
-  <div id="voiceConversationModal" class="voice-conversation-modal">
-    <div class="voice-conversation-content">
+  <div id="voiceConversationModal" class="modal-backdrop">
+    <div class="modal-content voice-conversation-content">
       <span class="close-modal-btn" id="closeVoiceConvModal">×</span>
       <div id="voiceInterface">
-        <div id="voiceTranscript"></div>
-        <div class="voice-sphere-container">
-            <div id="voiceSphere"></div>
+        <div id="voiceTranscriptContainer">
+            <p id="voiceTranscript"></p>
+        </div>
+        <div class="visualizer-container" id="visualizerContainer">
+            <div class="visualizer" id="visualizer">
+                <div class="visualizer-wave"></div>
+                <div class="visualizer-wave"></div>
+                <div class="visualizer-wave"></div>
+                <div class="visualizer-wave"></div>
+            </div>
         </div>
         <p id="voiceStatus">اضغط على الدائرة لبدء المحادثة</p>
       </div>
@@ -1312,7 +1236,8 @@
     // Voice Conversation Modal Elements
     const voiceConversationModal = document.getElementById('voiceConversationModal');
     const closeVoiceConvModalBtn = document.getElementById('closeVoiceConvModal');
-    const voiceSphere = document.getElementById('voiceSphere');
+    const visualizerContainer = document.getElementById('visualizerContainer');
+    const visualizer = document.getElementById('visualizer');
     const voiceStatus = document.getElementById('voiceStatus');
     const voiceTranscript = document.getElementById('voiceTranscript');
     
@@ -1369,6 +1294,13 @@
       downloadNotification.classList.remove('show');
     }
 
+    // --- Text and Emoji Processing ---
+    function stripEmojis(text) {
+        // Regex to remove a wide range of emojis and symbols
+        const emojiRegex = /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g;
+        return text.replace(emojiRegex, '');
+    }
+
     // --- Speech Synthesis (Text-to-Speech) ---
     const synth = window.speechSynthesis;
     let voices = [];
@@ -1384,31 +1316,32 @@
 
     function speakText(textToSpeak) {
         if (synth.speaking) {
-            console.error('speechSynthesis.speaking');
             synth.cancel();
         }
-        if (textToSpeak !== '') {
-            const utterThis = new SpeechSynthesisUtterance(textToSpeak);
+        
+        const cleanText = stripEmojis(textToSpeak);
+
+        if (cleanText !== '') {
+            const utterThis = new SpeechSynthesisUtterance(cleanText);
             utterThis.onstart = () => {
-                voiceSphere.classList.add('speaking');
+                visualizer.classList.remove('listening');
+                visualizer.classList.add('speaking');
                 voiceStatus.textContent = "جارِ التحدث...";
             };
             utterThis.onend = () => {
-                voiceSphere.classList.remove('speaking');
+                visualizer.classList.remove('speaking');
                 voiceStatus.textContent = "اضغط على الدائرة للتحدث";
                 isListening = false;
             };
             utterThis.onerror = (event) => {
                 console.error('SpeechSynthesisUtterance.onerror', event);
                 voiceStatus.textContent = "خطأ في نطق الرد";
-                voiceSphere.classList.remove('speaking');
+                visualizer.classList.remove('speaking');
             };
             
             const arabicVoice = voices.find(voice => voice.lang.startsWith('ar-'));
             if (arabicVoice) {
                 utterThis.voice = arabicVoice;
-            } else {
-                 console.warn("لم يتم العثور على صوت عربي. سيتم استخدام الصوت الافتراضي.");
             }
             utterThis.lang = 'ar-SA';
             synth.speak(utterThis);
@@ -1417,16 +1350,21 @@
 
     // --- Speech Recognition (Speech-to-Text) ---
     function initSpeechRecognition() {
-        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
             recognition.continuous = false;
             recognition.interimResults = true;
             recognition.lang = 'ar-SA';
 
             recognition.onstart = () => {
                 isListening = true;
+                if (synth.speaking) {
+                    synth.cancel(); // **Smart Interruption**
+                }
                 if (isVoiceConversationActive) {
-                    voiceSphere.classList.add('listening');
+                    visualizer.classList.remove('speaking');
+                    visualizer.classList.add('listening');
                     voiceStatus.textContent = "جاري الاستماع...";
                 } else {
                     voiceInputBtn.classList.add('recording');
@@ -1451,26 +1389,20 @@
             recognition.onerror = (event) => {
                 console.error('Speech recognition error', event.error);
                 let userMessage = "خطأ بالتعرف على الصوت: ";
-                switch (event.error) {
-                    case 'no-speech': userMessage += "لم يتم اكتشاف أي كلام."; break;
-                    case 'audio-capture': userMessage += "مشكلة في التقاط الصوت."; break;
-                    case 'not-allowed': userMessage += "لم يتم منح الإذن للميكروفون."; break;
-                    default: userMessage += event.error;
-                }
-                if (isVoiceConversationActive) {
-                    voiceStatus.textContent = userMessage;
-                } else {
-                    setStatus(userMessage, "error", 4000);
-                }
+                if(event.error === 'no-speech') userMessage += "لم يتم اكتشاف أي كلام.";
+                else if(event.error === 'not-allowed') userMessage += "لم يتم منح الإذن للميكروفون.";
+                else userMessage += event.error;
+
+                if (isVoiceConversationActive) voiceStatus.textContent = userMessage;
+                else setStatus(userMessage, "error", 4000);
+                
                 stopListening();
             };
             
             recognition.onend = () => {
-                if (isVoiceConversationActive) {
-                   const finalTranscript = voiceTranscript.textContent.trim();
-                   if (finalTranscript) {
-                       processVoiceQuery(finalTranscript);
-                   }
+                const finalTranscript = isVoiceConversationActive ? voiceTranscript.textContent.trim() : userInput.value.trim();
+                if (isVoiceConversationActive && finalTranscript) {
+                   processVoiceQuery(finalTranscript);
                 }
                 stopListening();
             };
@@ -1493,15 +1425,10 @@
             recognition.stop();
         } else {
             try {
-                if(fromModal) {
-                    voiceTranscript.textContent = '';
-                } else {
-                    userInput.value = ""; 
-                    autoResizeTextarea(); 
-                }
+                if(fromModal) voiceTranscript.textContent = '';
+                else { userInput.value = ""; autoResizeTextarea(); }
                 recognition.start();
             } catch (e) {
-                console.error("Error starting speech recognition:", e);
                 const msg = "لا يمكن بدء التعرف على الصوت.";
                 if(fromModal) voiceStatus.textContent = msg;
                 else setStatus(msg, "error", 3000);
@@ -1513,7 +1440,7 @@
     function stopListening() {
         isListening = false;
         if (isVoiceConversationActive) {
-             voiceSphere.classList.remove('listening');
+             visualizer.classList.remove('listening');
              if(voiceStatus.textContent === "جاري الاستماع...") {
                 voiceStatus.textContent = "اضغط على الدائرة للتحدث";
              }
@@ -1528,7 +1455,7 @@
     function registerServiceWorker() {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js')
-          .then((registration) => console.log('Service Worker registered.'))
+          .then(() => console.log('Service Worker registered.'))
           .catch((error) => console.error('Service Worker registration failed:', error));
       }
     }
@@ -1583,7 +1510,7 @@
         voiceInputBtn.addEventListener('click', () => toggleListening(false));
         shareBtn.addEventListener('click', () => shareModal.style.display = 'flex');
         closeShareModalBtn.addEventListener('click', () => shareModal.style.display = 'none');
-        voiceSphere.addEventListener('click', () => toggleListening(true));
+        visualizerContainer.addEventListener('click', () => toggleListening(true));
         closeVoiceConvModalBtn.addEventListener('click', closeVoiceConversation);
 
         copyLinkBtn.addEventListener('click', () => {
@@ -1642,14 +1569,12 @@
     }
     
     function openSubjectsView() {
-        chatWrapper.style.display = 'none';
         subjectsViewContainer.style.display = 'flex'; 
         handleChatScroll(); 
     }
 
     function closeSubjectsView() {
         subjectsViewContainer.style.display = 'none';
-        chatWrapper.style.display = 'flex'; 
         handleChatScroll(); 
     }
 
@@ -1686,12 +1611,10 @@
             closeSubjectsView();
             return;
         }
-
         allMessages[currentSubject] = messages; 
         currentSubject = subjectName;
         messages = allMessages[currentSubject] || []; 
         if (!allMessages[currentSubject]) { allMessages[currentSubject] = []; }
-
         updateSubjectUI();
         closeSubjectsView(); 
         addWelcomeMessage(); 
@@ -1705,12 +1628,10 @@
             if(subjectsViewContainer.style.display === 'flex') closeSubjectsView();
             return;
         }
-
         allMessages[currentSubject] = messages; 
         currentSubject = "general";
         messages = allMessages[currentSubject] || []; 
         if (!allMessages[currentSubject]) { allMessages[currentSubject] = []; }
-
         updateSubjectUI();
         if(subjectsViewContainer.style.display === 'flex') closeSubjectsView();
         addWelcomeMessage(); 
@@ -2001,7 +1922,8 @@
         
         const statusElement = isVoiceConversationActive ? voiceStatus : statusBar;
         statusElement.textContent = `${getBotDisplayName()} يفكر...`;
-        if(!isVoiceConversationActive) searchLog.textContent = `بحث: ${queryText.substring(0, 60)}...`;
+        if(isVoiceConversationActive) visualizer.classList.remove('listening');
+        else searchLog.textContent = `بحث: ${queryText.substring(0, 60)}...`;
 
         try {
             const responseText = await fetchGeminiResponse(generateChatPrompt(queryText));
@@ -2020,6 +1942,7 @@
             addMessage("bot", displayError, false, true); 
             if (isVoiceConversationActive) {
                 voiceStatus.textContent = "فشل الرد من Gemini.";
+                visualizer.classList.remove('speaking', 'listening');
             } else {
                 setStatus("فشل الرد من Gemini. ❌", "error");
             }
@@ -2069,6 +1992,7 @@
         isVoiceConversationActive = false;
         if(isListening) recognition.stop();
         if(synth.speaking) synth.cancel();
+        visualizer.classList.remove('listening', 'speaking');
     }
 
     async function openCamera() {
